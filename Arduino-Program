@@ -1,0 +1,55 @@
+int charge = 13;  //define charge pin on Arduino
+int light = 8;   //test led to see if serial com works also used for charge controller status
+String incomingByte = ""; //incoming serial text as string
+
+void setup() {
+Serial.begin(9600);
+pinMode(charge, OUTPUT);
+pinMode(light, OUTPUT);
+checkstatus();
+}
+void loop() {
+  while(Serial.available()){
+  delay(10);
+  char c = Serial.read();
+  incomingByte += c;
+  serialtest();
+  }
+    if(incomingByte.equals("80")){ //if battery percentage is at %80 ,turn off charge controller 
+      Serial.println("Received");
+      digitalWrite(charge, HIGH);
+      digitalWrite(light, LOW);
+      Serial.println("charge off");
+    
+    }else if (incomingByte.equals("30")){ //if battery percentage is at %30, turn on charge controller
+      Serial.println("Received");
+      digitalWrite(charge, LOW);
+      digitalWrite(light, HIGH);
+      Serial.println("charge on");
+    
+   }else if (incomingByte.equals("2")){ //used for serialtest
+      Serial.println(incomingByte);
+      digitalWrite(light, HIGH);
+      delay(500);
+      digitalWrite(light, LOW);
+   }
+  delay(500);
+  incomingByte = "";  //reset receive string
+}
+  void checkstatus(){  //checkstatus function to turn on or off when plugging in charge controller 
+    if(incomingByte <= "80"){
+    digitalWrite(charge, LOW);
+    digitalWrite(light, HIGH);
+    
+    }else if(incomingByte >= "80"){
+    digitalWrite(charge, HIGH);
+    digitalWrite(light, LOW);
+    }
+ }
+ void serialtest(){
+  if (incomingByte.equals("02")){
+    digitalWrite(light,HIGH);
+    delay(500);
+    digitalWrite(light,LOW);
+    }
+ }
