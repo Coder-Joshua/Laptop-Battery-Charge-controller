@@ -1,0 +1,115 @@
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Data;
+    using System.Drawing;
+    using System.IO.Ports;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using System.Windows.Forms;
+
+    namespace WindowsFormsApplication9
+    {
+        public partial class Form1 : Form
+        {
+            public Form1()
+            {
+                InitializeComponent();
+            }
+     
+            public string batterypercent, batterylife, battery = 0.ToString(), battery_life = 58.ToString(), 
+            battery_life2 = 80.ToString();
+        
+            private void Form1_Load(object sender, EventArgs e)
+            {
+            
+                string[] ports = SerialPort.GetPortNames();
+                foreach(string port in ports)
+                {
+                    comboBox1.Items.Add(port);
+                } 
+                comboBox1.SelectedIndex = 0;
+                close.Enabled = false;
+            
+            }
+
+            private void open_MouseClick(object sender, MouseEventArgs e)
+            {
+                open.Enabled = false;
+                close.Enabled = true;
+                try
+                {
+                    serialPort1.PortName = comboBox1.Text;
+                    serialPort1.Open();
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+            private void close_Click(object sender, EventArgs e)
+            {
+                close.Enabled = false;
+                open.Enabled = true;
+                try
+                {
+                    serialPort1.Close();
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message, "Message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+
+      
+  
+            private void button1_Click(object sender, EventArgs e)
+            {
+                if (serialPort1.IsOpen)
+                {
+                    string conf = 02.ToString(); 
+                    serialPort1.Write(conf);
+                
+
+                }else { MessageBox.Show("Serial is not connected"); }
+            
+            }
+
+            private void receive_on_Click(object sender, EventArgs e)
+            {
+                if (serialPort1.IsOpen)
+                {
+                    string c = serialPort1.ReadLine();
+                    serialReceive.Text += c + serialPort1.NewLine;
+                }else { MessageBox.Show("Serial is not connected"); }
+            
+            }
+              public void ShowPowerStatus()
+              {
+           
+                PowerStatus p = SystemInformation.PowerStatus;
+                batterypercent = p.BatteryChargeStatus.ToString();
+                batterylife = (100*SystemInformation.PowerStatus.BatteryLifePercent).ToString();
+            
+                    if (batterypercent.Equals(battery))
+                    {
+                        display.Text = "Discharging";
+                    }else { display.Text = batterypercent; }
+
+                if (serialPort1.IsOpen)
+                {
+                    serialPort1.Write(batterylife);
+                }
+
+                display2.Text = batterylife;
+            }
+            private void timer1_Tick(object sender, EventArgs e)
+            {
+                ShowPowerStatus();
+              
+            }
+        }
+    
+    }
